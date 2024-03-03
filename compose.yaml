@@ -1,0 +1,43 @@
+version: '3'
+services:
+
+  web:
+    build: Dockerfile.python
+    context: .
+    restart: always
+    networks:
+      backend:
+        ipv4_address: 172.20.0.5
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8
+    restart: always
+    networks:
+      backend:
+        ipv4_address: 172.20.0.10
+    volumes:
+      - db-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=example
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+
+networks:
+  backend:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+
+volumes:
+  db-data:
+
+include:
+  - proxy.yaml
